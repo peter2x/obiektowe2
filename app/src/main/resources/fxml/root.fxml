@@ -4,11 +4,15 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.text.Text?>
 
-<GridPane xmlns:fx="http://javafx.com/fxml" alignment="center" hgap="10" vgap="10">
+<?import javafx.scene.control.Button?>
+<GridPane alignment="center" hgap="10" vgap="10" xmlns:fx="https://javafx.com/fxml" fx:controller="Controllers.RootController">
     <padding><Insets top="25" right="25" bottom="10" left="25"/></padding>
-    <Text text="Welcome"
+    <Text
+          text="Welcome"
           GridPane.columnIndex="0"
           GridPane.rowIndex="0"
-          GridPane.columnSpan="2"/>
+          GridPane.columnSpan="2"
+    />
+    <Button fx:id="clickMeButton" text="click me" onAction="#handleButtonClick"/>
 </GridPane>
 
