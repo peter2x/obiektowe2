@@ -1,18 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.text.Text?>
 
-<?import javafx.scene.control.Button?>
-<GridPane alignment="center" hgap="10" vgap="10" xmlns:fx="https://javafx.com/fxml" fx:controller="Controllers.RootController">
-    <padding><Insets top="25" right="25" bottom="10" left="25"/></padding>
-    <Text
-          text="Welcome"
-          GridPane.columnIndex="0"
-          GridPane.rowIndex="0"
-          GridPane.columnSpan="2"
-    />
-    <Button fx:id="clickMeButton" text="click me" onAction="#handleButtonClick"/>
+<GridPane
+    xmlns:fx="http://javafx.com/fxml/1"
+    xmlns="http://javafx.com/javafx/15.0.1"
+    fx:controller="visualization.controllers.RootController"
+    fx:id="mapContainer"
+>
 </GridPane>
-

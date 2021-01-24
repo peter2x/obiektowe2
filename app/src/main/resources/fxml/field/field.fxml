@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.StackPane?>
+
+<?import javafx.scene.image.ImageView?>
+<StackPane
+    xmlns="http://javafx.com/javafx"
+    xmlns:fx="http://javafx.com/fxml"
+    fx:controller="visualization.controllers.field.FieldController"
+>
+    <ImageView fx:id="field"/>
+    <ImageView fx:id="tank"/>
+    <ImageView fx:id="projectile"/>
+</StackPane>
