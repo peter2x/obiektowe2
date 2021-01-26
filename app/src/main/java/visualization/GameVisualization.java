@@ -2,11 +2,6 @@ package visualization;
 
 import config.Config;
 import game.Game;
-import game.IGameObserver;
-import game.mapElements.IMapElement;
-import game.mapElements.Tank;
-import javafx.scene.input.KeyCode;
-import utils.Vector2d;
 import visualization.controllers.RootController;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -49,7 +44,7 @@ public class GameVisualization {
                 case RIGHT -> game.rotatePlayerTank(1);
                 case UP -> game.movePlayerTank(true);
                 case DOWN -> game.movePlayerTank(false);
-                case SPACE -> System.out.println("Space was pressed");
+                case SPACE -> game.shoot();
             }
         });
     }

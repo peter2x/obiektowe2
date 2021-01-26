@@ -1,6 +1,7 @@
 package game;
 
 import config.Config;
+import game.mapElements.Projectile;
 import game.mapElements.Tank;
 import game.worldMap.WorldMap;
 
@@ -11,15 +12,15 @@ import java.util.List;
 public class Game implements IGameEventPublisher {
     private final Config config;
     private final WorldMap map;
-    private List<IGameObserver> observers;
+    private final List<IGameObserver> observers = new LinkedList<>();
+    private final List<Tank> enemyTanks = new LinkedList<>();
+    private final List<Projectile> projectiles = new LinkedList<>();
     private Tank playerTank;
-    private List<Tank> enemyTanks;
+
 
     public Game(Config config) {
         this.config = config;
         this.map = new WorldMap(config);
-        this.observers = new LinkedList<>();
-        this.enemyTanks = new LinkedList<>();
     }
 
     public void start() {
@@ -31,7 +32,15 @@ public class Game implements IGameEventPublisher {
     }
 
     public void movePlayerTank(boolean isForward) {
-        playerTank.move(isForward);
+        if(!playerTank.move(isForward)) {
+            return;
+        };
+        endTurn();
+    }
+
+    public void shoot() {
+        projectiles.add(new Projectile(playerTank.getOrientation(), playerTank.getPosition(), map, observers));
+        endTurn();
     }
 
     @Override
@@ -47,5 +56,14 @@ public class Game implements IGameEventPublisher {
     @Override
     public void addAllObservers(Collection<? extends IGameObserver> observers) {
         this.observers.addAll(observers);
+    }
+
+    private void endTurn() {
+        for (Projectile projectile: projectiles) {
+            projectile.move();
+        }
+        for (IGameObserver observer: observers) {
+            observer.handleTurnEnd();
+        }
     }
 }

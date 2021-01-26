@@ -23,19 +23,20 @@ public class Tank extends AbstractMapElement {
         notifyObservers(observer -> observer.handleTankRotate(this, direction));
     }
 
-    public void move(boolean isForward) {
-        System.out.println("tank move");
+    public boolean move(boolean isForward) {
         if (getOrientation().getValue() % 2 != 0) {
-            return;
+            return false;
         }
         Vector2d moveVector = isForward ? getOrientation().toUnitVector() : getOrientation().toUnitVector().opposite();
         Vector2d nextPosition = getPosition().add(moveVector);
         nextPosition = map.fitToBorders(nextPosition);
         if (map.isOccupied(nextPosition)) {
-            return;
+            return false;
         }
         setPosition(nextPosition);
+        return true;
     }
+
 
     public Orientation getOrientation() {
         return orientation;
@@ -46,7 +47,6 @@ public class Tank extends AbstractMapElement {
     }
 
     private void setPosition(Vector2d position) {
-        System.out.println("tank set positoin");
         Vector2d oldPosition = getPosition();
         this.position = position;
         notifyObservers(observer -> observer.handleTankMoved(this, oldPosition));

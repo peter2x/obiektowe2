@@ -27,7 +27,6 @@ abstract public class AbstractMapElement implements IMapElement {
     }
 
     protected void notifyObservers(Consumer<IGameObserver> action) {
-        System.out.println("notify observers fired" + observers.size());
         for (IGameObserver observer: observers) {
             action.accept(observer);
         }

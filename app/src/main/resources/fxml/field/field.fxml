@@ -6,9 +6,9 @@
 <StackPane
     xmlns="http://javafx.com/javafx"
     xmlns:fx="http://javafx.com/fxml"
+    fx:id="fieldContainer"
     fx:controller="visualization.controllers.field.FieldController"
 >
     <ImageView fx:id="field"/>
     <ImageView fx:id="tank"/>
-    <ImageView fx:id="projectile"/>
 </StackPane>
