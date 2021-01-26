@@ -1,4 +1,5 @@
 import config.Config;
+import game.Game;
 import visualization.GameVisualization;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -12,7 +13,9 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) {
         Config config = new Config(15, 10);
-        GameVisualization visualization = new GameVisualization(config);
+        Game game = new Game(config);
+        GameVisualization visualization = new GameVisualization(game, config);
         visualization.start(stage);
+        game.start();
     }
 }

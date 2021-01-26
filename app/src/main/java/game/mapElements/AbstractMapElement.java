@@ -10,13 +10,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
-abstract public class AbstractMapElement implements IMapElement, IGameEventPublisher {
-    private Vector2d position;
+abstract public class AbstractMapElement implements IMapElement {
+    protected Vector2d position;
     private final List<IGameObserver> observers;
     protected final WorldMap map;
 
-    public AbstractMapElement(Vector2d position, WorldMap map) {
-        this.observers = new LinkedList<>();
+    public AbstractMapElement(Vector2d position, WorldMap map, List<IGameObserver> observers) {
+        this.observers = observers;
         this.position = position;
         this.map = map;
     }
@@ -26,28 +26,8 @@ abstract public class AbstractMapElement implements IMapElement, IGameEventPubli
         return position;
     }
 
-    @Override
-    public void addObserver(IGameObserver observer) {
-        this.observers.add(observer);
-    }
-
-    @Override
-    public void addAllObservers(Collection<? extends IGameObserver> observers) {
-        this.observers.addAll(observers);
-    }
-
-    @Override
-    public void removeObserver(IGameObserver observer) {
-        this.observers.remove(observer);
-    }
-
-    protected void setPosition(Vector2d position) {
-        Vector2d oldPosition = this.position;
-        this.position = position;
-        notifyObservers(observer -> observer.handleElementPositionChange(this, oldPosition));
-    }
-
     protected void notifyObservers(Consumer<IGameObserver> action) {
+        System.out.println("notify observers fired" + observers.size());
         for (IGameObserver observer: observers) {
             action.accept(observer);
         }

@@ -1,7 +1,12 @@
 package visualization;
 
 import config.Config;
+import game.Game;
+import game.IGameObserver;
+import game.mapElements.IMapElement;
+import game.mapElements.Tank;
 import javafx.scene.input.KeyCode;
+import utils.Vector2d;
 import visualization.controllers.RootController;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -12,10 +17,12 @@ import java.io.IOException;
 public class GameVisualization {
     private static final String FXML_ROOT_PATH = "../fxml/root.fxml";
     private final Config config;
+    private final Game game;
     private Scene scene;
 
-    public GameVisualization(Config config) {
+    public GameVisualization(Game game, Config config) {
         this.config = config;
+        this.game = game;
     }
 
     public void start(Stage stage) {
@@ -23,7 +30,8 @@ public class GameVisualization {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_ROOT_PATH));
             Parent root = loader.load();
             RootController rootController = loader.getController();
-            rootController.initialize(config);
+            rootController.initialize(game, config);
+            game.addObserver(rootController);
             scene = new Scene(root, 300, 275);
             attachKeyPressEvents();
             stage.setTitle("FXML Welcome");
@@ -36,11 +44,12 @@ public class GameVisualization {
 
     private void attachKeyPressEvents() {
         scene.setOnKeyReleased(e -> {
-            if (e.getCode() == KeyCode.LEFT) {
-                System.out.println("A left arrow was pressed");
-            }
-            if (e.getCode() == KeyCode.RIGHT) {
-                System.out.println("A right arrow was pressed");
+            switch (e.getCode()) {
+                case LEFT -> game.rotatePlayerTank(-1);
+                case RIGHT -> game.rotatePlayerTank(1);
+                case UP -> game.movePlayerTank(true);
+                case DOWN -> game.movePlayerTank(false);
+                case SPACE -> System.out.println("Space was pressed");
             }
         });
     }

@@ -6,5 +6,6 @@ import utils.Vector2d;
 
 public interface IGameObserver {
     void handleTankRotate(Tank tank, int oldValue);
-    void handleElementPositionChange(IMapElement element, Vector2d oldPosition);
+    void handleTankMoved(Tank element, Vector2d oldPosition);
+    void handleTankAdded(Tank tank);
 }

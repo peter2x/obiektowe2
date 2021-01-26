@@ -1,23 +1,54 @@
 package game.mapElements;
 
+import game.IGameObserver;
 import game.worldMap.WorldMap;
 import utils.Vector2d;
 
-public class Tank extends AbstractMapElement {
-    private int orientation = 0;
+import java.util.List;
 
-    public Tank(WorldMap map) {
-        super(new Vector2d(2, 2), map);
-        this.orientation = (int)(Math.random() * 8);
+public class Tank extends AbstractMapElement {
+    private Orientation orientation;
+    private final boolean isPlayer;
+
+    public Tank(WorldMap map, List<IGameObserver> observers, boolean isPlayer) {
+        super(new Vector2d(2, 2), map, observers);
+        this.orientation = Orientation.values()[(int)(Math.random() * 8)];
+        this.isPlayer = isPlayer;
+        notifyObservers(observer -> observer.handleTankAdded(this));
     }
 
     public void rotate(int direction) {
-        orientation += direction;
-        orientation = (orientation + 8) % 8;
+        orientation = Orientation.values()[(orientation.getValue() + direction + 8) % 8];
+        System.out.println(orientation);
         notifyObservers(observer -> observer.handleTankRotate(this, direction));
     }
 
-    public int getOrientation() {
+    public void move(boolean isForward) {
+        System.out.println("tank move");
+        if (getOrientation().getValue() % 2 != 0) {
+            return;
+        }
+        Vector2d moveVector = isForward ? getOrientation().toUnitVector() : getOrientation().toUnitVector().opposite();
+        Vector2d nextPosition = getPosition().add(moveVector);
+        nextPosition = map.fitToBorders(nextPosition);
+        if (map.isOccupied(nextPosition)) {
+            return;
+        }
+        setPosition(nextPosition);
+    }
+
+    public Orientation getOrientation() {
         return orientation;
+    }
+
+    public boolean isPlayer() {
+        return isPlayer;
+    }
+
+    private void setPosition(Vector2d position) {
+        System.out.println("tank set positoin");
+        Vector2d oldPosition = getPosition();
+        this.position = position;
+        notifyObservers(observer -> observer.handleTankMoved(this, oldPosition));
     }
 }

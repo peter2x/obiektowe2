@@ -1,14 +1,14 @@
 package visualization.controllers.field;
 import config.Config;
+import game.Game;
+import game.mapElements.Orientation;
+import game.mapElements.Tank;
 import javafx.fxml.FXML;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.StackPane;
 import utils.ImagesManager;
 
 
 public class FieldController {
-    private static int index = 0;
     private static final String FIELD_TEXTURE_PATH = "earth.jpg";
     private static final String TANK_BLUE_TEXTURE_PATH = "tank_blue.png";
     private static final String TANK_RED_TEXTURE_PATH = "tank_red.png";
@@ -17,19 +17,26 @@ public class FieldController {
     @FXML private ImageView field;
     @FXML private ImageView tank;
     @FXML private ImageView projectile;
+    private Game game;
 
-    public void initialize(Config config) {
-        index += 1;
+    public void initialize(Game game, Config config) {
         field.setImage(ImagesManager.getImage(FIELD_TEXTURE_PATH));
         field.setFitHeight((double)(900 / config.width()));
         field.setFitWidth((double)(900 / config.height()));
-        tank.setImage(ImagesManager.getImage(index % 2 == 0 ? TANK_BLUE_TEXTURE_PATH : TANK_RED_TEXTURE_PATH));
+        // projectile.setImage(ImagesManager.getImage(PROJECTILE_TEXTURE_PATH));
+        // projectile.setFitWidth((double)52);
+        // projectile.setFitHeight((double)41);
+    }
+
+    public void setTankOrientation(Orientation orientation) {
+        tank.rotateProperty().setValue(45 * orientation.getValue());
+    }
+
+    public void addTank(Tank added) {
+        tank.setImage(ImagesManager.getImage(added.isPlayer() ? TANK_BLUE_TEXTURE_PATH : TANK_RED_TEXTURE_PATH));
+        tank.rotateProperty().setValue(45 * added.getOrientation().getValue());
         tank.setFitWidth((double)52);
         tank.setFitHeight((double)41);
-        tank.rotateProperty().setValue(45 * index);
-        projectile.setImage(ImagesManager.getImage(PROJECTILE_TEXTURE_PATH));
-        projectile.setFitWidth((double)52);
-        projectile.setFitHeight((double)41);
     }
 
     public void removeTank() {
