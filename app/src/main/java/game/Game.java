@@ -3,6 +3,7 @@ package game;
 import config.Config;
 import game.mapElements.Tank;
 import game.worldMap.WorldMap;
+import utils.Vector2d;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -24,7 +25,9 @@ public class Game implements IGameEventPublisher {
     }
 
     public void start() {
-        playerTank = new Tank(map, observers, true);
+        playerTank = new Tank(new Vector2d(2, 2), map, observers, true);
+        map.setPlayerTank(playerTank);
+        endTurn();
     }
 
     public void rotatePlayerTank(int direction) {

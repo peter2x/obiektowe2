@@ -16,7 +16,9 @@ import visualization.controllers.field.FieldController;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class RootController implements IGameObserver {
     private static final String FIELD_FXML_PATH = "../../fxml/field/field.fxml";
@@ -25,6 +27,8 @@ public class RootController implements IGameObserver {
     private Game game;
     private FieldController[][] fieldControllers;
     private Map<Projectile, Vector2d> movedProjectilesCache = new HashMap<>();
+    private Set<Vector2d> clearedFieldsCache = new HashSet<>();
+    private Set<IMapElement> addedElementsCache = new HashSet<>();
 
 
     public void initialize(Game game, Config config) throws IOException {
@@ -52,8 +56,8 @@ public class RootController implements IGameObserver {
     }
 
     @Override
-    public void handleTankAdded(Tank tank) {
-        fieldControllers[tank.getPosition().x][tank.getPosition().y].addElement(tank);
+    public void handleElementAdded(IMapElement element) {
+        addedElementsCache.add(element);
     }
 
     @Override
@@ -71,12 +75,13 @@ public class RootController implements IGameObserver {
     @Override
     public void handleTurnEnd() {
         moveProjectiles();
-        movedProjectilesCache.clear();
+        clearFields();
+        addElements();
     }
 
     @Override
     public void handleElementDestroyed(IMapElement element) {
-        fieldControllers[element.getPosition().x][element.getPosition().y].removeElement();
+        clearedFieldsCache.add(new Vector2d(element.getPosition().x, element.getPosition().y));
     }
 
     private void moveProjectiles() {
@@ -86,11 +91,27 @@ public class RootController implements IGameObserver {
             fieldControllers[oldPosition.x][oldPosition.y].removeProjectile(moved);
             fieldControllers[moved.getPosition().x][moved.getPosition().y].addProjectile(moved);
         }
+        movedProjectilesCache.clear();
     }
 
     @Override
     public void handleGameEnd(int finalScore) {
         mapContainer.getChildren().clear();
         mapContainer.add(new Text("final score is: " + finalScore), 0, 0);
+    }
+
+    private void clearFields() {
+        for (Vector2d position: clearedFieldsCache) {
+            fieldControllers[position.x][position.y].removeElement();
+            fieldControllers[position.x][position.y].removeProjectiles();
+        }
+        clearedFieldsCache.clear();
+    }
+
+    private void addElements() {
+        for (IMapElement element: addedElementsCache) {
+            fieldControllers[element.getPosition().x][element.getPosition().y].addElement(element);
+        }
+        addedElementsCache.clear();
     }
 }

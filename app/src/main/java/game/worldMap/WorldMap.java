@@ -3,10 +3,7 @@ package game.worldMap;
 import config.Config;
 import game.Game;
 import game.IGameObserver;
-import game.mapElements.IMapElement;
-import game.mapElements.Orientation;
-import game.mapElements.Projectile;
-import game.mapElements.Tank;
+import game.mapElements.*;
 import utils.Vector2d;
 
 import java.util.*;
@@ -18,6 +15,7 @@ public class WorldMap implements IGameObserver {
     private final Map<Vector2d, List<Projectile>> positionToProjectiles = new HashMap<>();
     private final List<IGameObserver> observers;
     private final Game game;
+    private Tank playerTank;
 
     public WorldMap(Game game, Config config, List<IGameObserver> observers) {
         this.config = config;
@@ -51,6 +49,8 @@ public class WorldMap implements IGameObserver {
     @Override
     public void handleTankMoved(Tank moved, Vector2d oldPosition) {
         Vector2d newPosition = moved.getPosition();
+        freePositions.remove(newPosition);
+        freePositions.add(oldPosition);
         positionToBlockingElement.remove(oldPosition);
         positionToBlockingElement.put(newPosition, moved);
         positionToProjectiles.putIfAbsent(newPosition, new LinkedList<>());
@@ -67,14 +67,17 @@ public class WorldMap implements IGameObserver {
     }
 
     @Override
-    public void handleTankAdded(Tank tank) {
-        positionToBlockingElement.put(tank.getPosition(), tank);
+    public void handleElementAdded(IMapElement element) {
+        if (element.isBlocking()) {
+            positionToBlockingElement.put(element.getPosition(), element);
+        }
+        freePositions.remove(element.getPosition());
     }
 
     @Override
     public void handleProjectileMoved(Projectile moved, Vector2d oldPosition) {
         positionToProjectiles.get(oldPosition).remove(moved);
-        if (positionToProjectiles.get(oldPosition).isEmpty()) {
+        if (positionToProjectiles.get(oldPosition).isEmpty() && !oldPosition.equals(playerTank.getPosition())) {
             freePositions.add(oldPosition);
         }
         Vector2d newPosition = moved.getPosition();
@@ -90,6 +93,8 @@ public class WorldMap implements IGameObserver {
     @Override
     public void handleTurnEnd() {
         moveProjectiles();
+        spawnObstacles();
+        spawnEnemyTanks();
     }
 
     @Override
@@ -122,5 +127,29 @@ public class WorldMap implements IGameObserver {
         }
     }
 
+    private void spawnObstacles() {
+        List<Vector2d> randomPositions = new ArrayList<Vector2d>(freePositions);
+        Collections.shuffle(randomPositions);
+        for (int i = 0; i < 1; i++) {
+            if (randomPositions.size() - 1 < i) {
+                return;
+            }
+            new Obstacle(randomPositions.get(i), this, observers);
+        }
+    }
 
+    private void spawnEnemyTanks() {
+        List<Vector2d> randomPositions = new ArrayList<Vector2d>(freePositions);
+        Collections.shuffle(randomPositions);
+        for (int i = 0; i < 1; i++) {
+            if (randomPositions.size() - 1 < i) {
+                return;
+            }
+            new Tank(randomPositions.get(i), this, observers, false);
+        }
+    }
+
+    public void setPlayerTank(Tank playerTank) {
+        this.playerTank = playerTank;
+    }
 }

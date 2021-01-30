@@ -10,16 +10,15 @@ public class Tank extends AbstractMapElement {
     private Orientation orientation;
     private final boolean isPlayer;
 
-    public Tank(WorldMap map, List<IGameObserver> observers, boolean isPlayer) {
-        super(new Vector2d(2, 2), map, observers);
+    public Tank(Vector2d position, WorldMap map, List<IGameObserver> observers, boolean isPlayer) {
+        super(position, map, observers);
         this.orientation = Orientation.values()[(int)(Math.random() * 8)];
         this.isPlayer = isPlayer;
-        notifyObservers(observer -> observer.handleTankAdded(this));
+        notifyObservers(observer -> observer.handleElementAdded(this));
     }
 
     public void rotate(int direction) {
         orientation = Orientation.values()[(orientation.getValue() + direction + 8) % 8];
-        System.out.println(orientation);
         notifyObservers(observer -> observer.handleTankRotate(this, direction));
     }
 
@@ -30,6 +29,10 @@ public class Tank extends AbstractMapElement {
 
     public boolean isBlocking() {
         return true;
+    }
+
+    public void makeTurn() {
+
     }
 
     public boolean move(boolean isForward) {

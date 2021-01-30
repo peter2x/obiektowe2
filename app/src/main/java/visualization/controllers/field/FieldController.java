@@ -47,6 +47,7 @@ public class FieldController {
             element.setFitHeight((double)41);
         } else {
             element.setImage(ImagesManager.getImage(OBSTACLE_TEXTURE_PATH));
+            element.rotateProperty().setValue(0);
             element.setFitHeight((double)(900 / config.width()));
             element.setFitWidth((double)(900 / config.height()));
         }
