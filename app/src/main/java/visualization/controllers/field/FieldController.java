@@ -1,6 +1,7 @@
 package visualization.controllers.field;
 import config.Config;
 import game.Game;
+import game.mapElements.IMapElement;
 import game.mapElements.Orientation;
 import game.mapElements.Projectile;
 import game.mapElements.Tank;
@@ -18,31 +19,42 @@ public class FieldController {
     private static final String TANK_BLUE_TEXTURE_PATH = "tank_blue.png";
     private static final String TANK_RED_TEXTURE_PATH = "tank_red.png";
     private static final String PROJECTILE_TEXTURE_PATH = "projectile-removebg-preview.png";
+    private static final String OBSTACLE_TEXTURE_PATH = "obstacle.jpg";
 
     @FXML private ImageView field;
-    @FXML private ImageView tank;
+    @FXML private ImageView element;
     @FXML private StackPane fieldContainer;
     private Game game;
+    private Config config;
     private final Map<Projectile, ImageView> projectileToImages = new HashMap<>();
 
     public void initialize(Game game, Config config) {
         field.setImage(ImagesManager.getImage(FIELD_TEXTURE_PATH));
         field.setFitHeight((double)(900 / config.width()));
         field.setFitWidth((double)(900 / config.height()));
-        // projectile.setImage(ImagesManager.getImage(PROJECTILE_TEXTURE_PATH));
-        // projectile.setFitWidth((double)52);
-        // projectile.setFitHeight((double)41);
+        this.config = config;
     }
 
     public void setTankOrientation(Orientation orientation) {
-        tank.rotateProperty().setValue(45 * orientation.getValue());
+        element.rotateProperty().setValue(45 * orientation.getValue());
     }
 
-    public void addTank(Tank added) {
-        tank.setImage(ImagesManager.getImage(added.isPlayer() ? TANK_BLUE_TEXTURE_PATH : TANK_RED_TEXTURE_PATH));
-        tank.rotateProperty().setValue(45 * added.getOrientation().getValue());
-        tank.setFitWidth((double)52);
-        tank.setFitHeight((double)41);
+    public void addElement(IMapElement added) {
+        if (added instanceof Tank tank) {
+            element.setImage(ImagesManager.getImage(tank.isPlayer() ? TANK_BLUE_TEXTURE_PATH : TANK_RED_TEXTURE_PATH));
+            element.rotateProperty().setValue(45 * tank.getOrientation().getValue());
+            element.setFitWidth((double)52);
+            element.setFitHeight((double)41);
+        } else {
+            element.setImage(ImagesManager.getImage(OBSTACLE_TEXTURE_PATH));
+            element.setFitHeight((double)(900 / config.width()));
+            element.setFitWidth((double)(900 / config.height()));
+        }
+    }
+
+    public void removeProjectiles() {
+        fieldContainer.getChildren().removeAll(projectileToImages.values());
+        projectileToImages.clear();
     }
 
     public void removeProjectile(Projectile removedProjectile) {
@@ -52,6 +64,9 @@ public class FieldController {
     }
 
     public void addProjectile(Projectile addedProjectile) {
+        if (element.getImage() != null) {
+            return;
+        }
         ImageView projectileImage = new ImageView(ImagesManager.getImage(PROJECTILE_TEXTURE_PATH));
         projectileImage.setFitWidth((double)52);
         projectileImage.setFitHeight((double)41);
@@ -60,9 +75,10 @@ public class FieldController {
         fieldContainer.getChildren().add(projectileImage);
     }
 
-    public void removeTank() {
-        tank.setImage(null);
+    public void removeElement() {
+        element.setImage(null);
     }
+
 }
 
 

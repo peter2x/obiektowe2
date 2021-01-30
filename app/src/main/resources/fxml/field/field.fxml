@@ -10,5 +10,5 @@
     fx:controller="visualization.controllers.field.FieldController"
 >
     <ImageView fx:id="field"/>
-    <ImageView fx:id="tank"/>
+    <ImageView fx:id="element"/>
 </StackPane>

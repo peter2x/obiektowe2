@@ -3,12 +3,14 @@ package visualization.controllers;
 import config.Config;
 import game.Game;
 import game.IGameObserver;
+import game.mapElements.IMapElement;
 import game.mapElements.Projectile;
 import game.mapElements.Tank;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.text.Text;
 import utils.Vector2d;
 import visualization.controllers.field.FieldController;
 
@@ -51,13 +53,14 @@ public class RootController implements IGameObserver {
 
     @Override
     public void handleTankAdded(Tank tank) {
-        fieldControllers[tank.getPosition().x][tank.getPosition().y].addTank(tank);
+        fieldControllers[tank.getPosition().x][tank.getPosition().y].addElement(tank);
     }
 
     @Override
     public void handleTankMoved(Tank moved, Vector2d oldPosition) {
-        fieldControllers[oldPosition.x][oldPosition.y].removeTank();
-        fieldControllers[moved.getPosition().x][moved.getPosition().y].addTank(moved);
+        fieldControllers[oldPosition.x][oldPosition.y].removeElement();
+        fieldControllers[moved.getPosition().x][moved.getPosition().y].addElement(moved);
+        fieldControllers[moved.getPosition().x][moved.getPosition().y].removeProjectiles();
     }
 
     @Override
@@ -68,6 +71,12 @@ public class RootController implements IGameObserver {
     @Override
     public void handleTurnEnd() {
         moveProjectiles();
+        movedProjectilesCache.clear();
+    }
+
+    @Override
+    public void handleElementDestroyed(IMapElement element) {
+        fieldControllers[element.getPosition().x][element.getPosition().y].removeElement();
     }
 
     private void moveProjectiles() {
@@ -77,5 +86,11 @@ public class RootController implements IGameObserver {
             fieldControllers[oldPosition.x][oldPosition.y].removeProjectile(moved);
             fieldControllers[moved.getPosition().x][moved.getPosition().y].addProjectile(moved);
         }
+    }
+
+    @Override
+    public void handleGameEnd(int finalScore) {
+        mapContainer.getChildren().clear();
+        mapContainer.add(new Text("final score is: " + finalScore), 0, 0);
     }
 }

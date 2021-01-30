@@ -1,7 +1,6 @@
 package game;
 
 import config.Config;
-import game.mapElements.Projectile;
 import game.mapElements.Tank;
 import game.worldMap.WorldMap;
 
@@ -13,14 +12,15 @@ public class Game implements IGameEventPublisher {
     private final Config config;
     private final WorldMap map;
     private final List<IGameObserver> observers = new LinkedList<>();
-    private final List<Tank> enemyTanks = new LinkedList<>();
-    private final List<Projectile> projectiles = new LinkedList<>();
     private Tank playerTank;
+    private int score = 0;
+    private boolean isFinished = false;
 
 
     public Game(Config config) {
         this.config = config;
-        this.map = new WorldMap(config);
+        this.map = new WorldMap(this, config, observers);
+        addObserver(map);
     }
 
     public void start() {
@@ -28,18 +28,27 @@ public class Game implements IGameEventPublisher {
     }
 
     public void rotatePlayerTank(int direction) {
+        if (isFinished) {
+            return;
+        }
         playerTank.rotate(direction);
     }
 
     public void movePlayerTank(boolean isForward) {
+        if (isFinished) {
+            return;
+        }
         if(!playerTank.move(isForward)) {
             return;
-        };
+        }
         endTurn();
     }
 
     public void shoot() {
-        projectiles.add(new Projectile(playerTank.getOrientation(), playerTank.getPosition(), map, observers));
+        if (isFinished) {
+            return;
+        }
+        map.shoot(playerTank.getPosition(), playerTank.getOrientation());
         endTurn();
     }
 
@@ -59,11 +68,24 @@ public class Game implements IGameEventPublisher {
     }
 
     private void endTurn() {
-        for (Projectile projectile: projectiles) {
-            projectile.move();
-        }
         for (IGameObserver observer: observers) {
             observer.handleTurnEnd();
         }
+    }
+
+    public void end() {
+        isFinished = true;
+        for (IGameObserver observer: observers) {
+            observer.handleGameEnd(score);
+        }
+    }
+
+    public void incrementScore() {
+        score++;
+    }
+
+
+    private void spawnEnemyTanks() {
+
     }
 }

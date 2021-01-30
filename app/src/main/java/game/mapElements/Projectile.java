@@ -14,6 +14,10 @@ public class Projectile extends AbstractMapElement {
         this.orientation = orientation;
     }
 
+    public boolean isBlocking() {
+        return false;
+    }
+
     public void move() {
         Vector2d nextPosition = getPosition().add(getOrientation().toUnitVector());
         nextPosition = map.fitToBorders(nextPosition);
@@ -28,5 +32,10 @@ public class Projectile extends AbstractMapElement {
         Vector2d oldPosition = getPosition();
         this.position = position;
         notifyObservers(observer -> observer.handleProjectileMoved(this, oldPosition));
+    }
+
+    @Override
+    public void getShoot() {
+
     }
 }

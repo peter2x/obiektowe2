@@ -11,4 +11,6 @@ public interface IGameObserver {
     void handleTankAdded(Tank tank);
     void handleProjectileMoved(Projectile moved, Vector2d oldPosition);
     void handleTurnEnd();
+    void handleElementDestroyed(IMapElement element);
+    void handleGameEnd(int finalScore);
 }

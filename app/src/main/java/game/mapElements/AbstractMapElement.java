@@ -4,9 +4,6 @@ import game.IGameEventPublisher;
 import game.IGameObserver;
 import game.worldMap.WorldMap;
 import utils.Vector2d;
-
-import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -20,6 +17,12 @@ abstract public class AbstractMapElement implements IMapElement {
         this.position = position;
         this.map = map;
     }
+
+    @Override
+    abstract public boolean isBlocking();
+
+    @Override
+    abstract public void getShoot();
 
     @Override
     public Vector2d getPosition() {
