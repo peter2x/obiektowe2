@@ -8,6 +8,7 @@ import game.mapElements.Projectile;
 import game.mapElements.Tank;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
@@ -23,13 +24,14 @@ import java.util.Set;
 public class RootController implements IGameObserver {
     private static final String FIELD_FXML_PATH = "../../fxml/field/field.fxml";
     @FXML private GridPane mapContainer;
+    @FXML private Label scoreLabel;
     private Config config;
     private Game game;
     private FieldController[][] fieldControllers;
     private Map<Projectile, Vector2d> movedProjectilesCache = new HashMap<>();
     private Set<Vector2d> clearedFieldsCache = new HashSet<>();
     private Set<IMapElement> addedElementsCache = new HashSet<>();
-
+    private int score = 0;
 
     public void initialize(Game game, Config config) throws IOException {
         this.config = config;
@@ -51,7 +53,7 @@ public class RootController implements IGameObserver {
     }
 
     @Override
-    public void handleTankRotate(Tank tank, int oldValue) {
+    public void handleTankRotate(Tank tank) {
         fieldControllers[tank.getPosition().x][tank.getPosition().y].setTankOrientation(tank.getOrientation());
     }
 
@@ -82,6 +84,11 @@ public class RootController implements IGameObserver {
     @Override
     public void handleElementDestroyed(IMapElement element) {
         clearedFieldsCache.add(new Vector2d(element.getPosition().x, element.getPosition().y));
+        if (element instanceof Tank tank) {
+            if (!tank.isPlayer()) {
+                handleScoreIncrement();
+            }
+        }
     }
 
     private void moveProjectiles() {
@@ -97,7 +104,7 @@ public class RootController implements IGameObserver {
     @Override
     public void handleGameEnd(int finalScore) {
         mapContainer.getChildren().clear();
-        mapContainer.add(new Text("final score is: " + finalScore), 0, 0);
+        mapContainer.add(new Text("You have lost"), 0, 0);
     }
 
     private void clearFields() {
@@ -113,5 +120,10 @@ public class RootController implements IGameObserver {
             fieldControllers[element.getPosition().x][element.getPosition().y].addElement(element);
         }
         addedElementsCache.clear();
+    }
+
+    private void handleScoreIncrement() {
+        score += 1;
+        scoreLabel.setText("score: " + score);
     }
 }

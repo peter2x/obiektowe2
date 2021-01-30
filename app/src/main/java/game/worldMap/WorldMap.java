@@ -45,7 +45,7 @@ public class WorldMap implements IGameObserver {
 
 
     @Override
-    public void handleTankRotate(Tank tank, int oldValue) {
+    public void handleTankRotate(Tank tank) {
 
     }
 
@@ -139,6 +139,9 @@ public class WorldMap implements IGameObserver {
     }
 
     private void spawnObstacles() {
+        if (positionToBlockingElement.values().size() > config.width() * 1.6) {
+            return;
+        }
         List<Vector2d> randomPositions = new ArrayList<Vector2d>(freePositions);
         Collections.shuffle(randomPositions);
         for (int i = 0; i < 1; i++) {
@@ -164,7 +167,8 @@ public class WorldMap implements IGameObserver {
     }
 
     private void moveEnemyTanks() {
-        for (Tank enemy: enemyTanks) {
+        List<Tank> tanksToMove = new LinkedList<>(enemyTanks);
+        for (Tank enemy: tanksToMove) {
             enemy.makeMove();
         }
     }
@@ -173,7 +177,13 @@ public class WorldMap implements IGameObserver {
         this.playerTank = playerTank;
     }
 
-    public void shootAtPlayer(Tank shooting) {
+    public Vector2d getPlayerTankPosition() {
+        return playerTank.getPosition();
+    }
 
+    public void shootAtPlayer(Tank shooting) {
+        positionToProjectiles.putIfAbsent(shooting.getPosition(), new LinkedList<>());
+        Projectile created = new Projectile(shooting.getOrientation(), shooting.getPosition(), this, observers);
+        positionToProjectiles.get(shooting.getPosition()).add(created);
     }
 }

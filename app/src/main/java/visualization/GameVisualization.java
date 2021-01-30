@@ -29,7 +29,7 @@ public class GameVisualization {
             game.addObserver(rootController);
             scene = new Scene(root, 300, 275);
             attachKeyPressEvents();
-            stage.setTitle("FXML Welcome");
+            stage.setTitle("Tanks");
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {

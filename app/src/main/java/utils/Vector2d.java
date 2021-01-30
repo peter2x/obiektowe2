@@ -1,5 +1,7 @@
 package utils;
 
+import game.mapElements.Orientation;
+
 import java.util.Objects;
 
 public class Vector2d {
@@ -71,5 +73,31 @@ public class Vector2d {
         }
         Vector2d relativePos = new Vector2d(newX, newY);
         return lowerLeft.add(relativePos);
+    }
+
+    public Orientation toOrientation() {
+        if (y > x * Math.tan(Math.PI * 3 / 8) && y >= -x * Math.tan(Math.PI * 3 / 8)) {
+            return Orientation.NORTH;
+        }
+        if (y > x * Math.tan(Math.PI * 1 / 8) && y <= x * Math.tan(Math.PI * 3 / 8)) {
+            return Orientation.NORTH_EAST;
+        }
+        if (y > -x * Math.tan(Math.PI * 1 / 8) && y <= x * Math.tan(Math.PI * 1 / 8)) {
+            return Orientation.EAST;
+        }
+        if (y > -x * Math.tan(Math.PI * 3 / 8) && y <= -x * Math.tan(Math.PI * 1 / 8)) {
+            return Orientation.SOUTH_EAST;
+        }
+        if (y < x * Math.tan(Math.PI * 3 / 8) && y <= -x * Math.tan(Math.PI * 3 / 8)) {
+            return Orientation.SOUTH;
+        }
+        if (y >= x * Math.tan(Math.PI * 3 / 8) && y > x * Math.tan(Math.PI * 1 / 8)) {
+            return Orientation.SOUTH_WEST;
+        }
+        if (y > x * Math.tan(Math.PI * 1 / 8) && y <= -x * Math.tan(Math.PI * 1 / 8)) {
+            return Orientation.WEST;
+        } else {
+            return Orientation.NORTH_WEST;
+        }
     }
 }

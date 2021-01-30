@@ -19,7 +19,7 @@ public class Tank extends AbstractMapElement {
 
     public void rotate(int direction) {
         orientation = Orientation.values()[(orientation.getValue() + direction + 8) % 8];
-        notifyObservers(observer -> observer.handleTankRotate(this, direction));
+        notifyObservers(observer -> observer.handleTankRotate(this));
     }
 
     @Override
@@ -41,6 +41,9 @@ public class Tank extends AbstractMapElement {
             ride(true);
         }
         if (random == 1) {
+            Vector2d shootVector = map.getPlayerTankPosition().subtract(getPosition());
+            orientation = shootVector.toOrientation();
+            notifyObservers(observer -> observer.handleTankRotate(this));
             map.shootAtPlayer(this);
         }
     }

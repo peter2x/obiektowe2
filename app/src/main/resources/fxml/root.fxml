@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Label?>
 
-<GridPane
+<VBox
+    fx:controller="visualization.controllers.RootController"
     xmlns:fx="http://javafx.com/fxml/1"
     xmlns="http://javafx.com/javafx/15.0.1"
-    fx:controller="visualization.controllers.RootController"
-    fx:id="mapContainer"
 >
-</GridPane>
+    <GridPane fx:id="mapContainer"/>
+    <Label fx:id="scoreLabel" text="score: 0" style="-fx-font: 32 arial;"/>
+</VBox>
