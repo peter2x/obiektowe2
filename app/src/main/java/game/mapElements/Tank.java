@@ -31,11 +31,21 @@ public class Tank extends AbstractMapElement {
         return true;
     }
 
-    public void makeTurn() {
-
+    public void makeMove() {
+        int random = (int)(Math.random() * 2);
+        if (random == 0) {
+            orientation = Orientation.values()[(int)(Math.random() * 8)];
+            if (orientation.getValue() % 2 == 1) {
+                orientation = Orientation.values()[orientation.getValue() - 1];
+            }
+            ride(true);
+        }
+        if (random == 1) {
+            map.shootAtPlayer(this);
+        }
     }
 
-    public boolean move(boolean isForward) {
+    public boolean ride(boolean isForward) {
         if (getOrientation().getValue() % 2 != 0) {
             return false;
         }

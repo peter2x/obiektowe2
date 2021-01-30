@@ -41,7 +41,7 @@ public class Game implements IGameEventPublisher {
         if (isFinished) {
             return;
         }
-        if(!playerTank.move(isForward)) {
+        if(!playerTank.ride(isForward)) {
             return;
         }
         endTurn();

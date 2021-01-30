@@ -13,6 +13,7 @@ public class WorldMap implements IGameObserver {
     private final Map<Vector2d, IMapElement> positionToBlockingElement = new HashMap();
     private final Set<Vector2d> freePositions = new HashSet<>();
     private final Map<Vector2d, List<Projectile>> positionToProjectiles = new HashMap<>();
+    private final List<Tank> enemyTanks = new LinkedList<>();
     private final List<IGameObserver> observers;
     private final Game game;
     private Tank playerTank;
@@ -37,7 +38,9 @@ public class WorldMap implements IGameObserver {
     }
 
     public Vector2d fitToBorders(Vector2d position) {
-        return position.fitToRectangle(new Vector2d(0, 0), new Vector2d(config.width() - 1, config.height() - 1));
+        Vector2d lowerLeft = new Vector2d(0, 0);
+        Vector2d upperRight =  new Vector2d(config.width() - 1, config.height() - 1);
+        return position.fitToRectangle(lowerLeft, upperRight);
     }
 
 
@@ -68,6 +71,11 @@ public class WorldMap implements IGameObserver {
 
     @Override
     public void handleElementAdded(IMapElement element) {
+        if (element instanceof Tank tank) {
+            if (!tank.isPlayer()) {
+                enemyTanks.add(tank);
+            }
+        }
         if (element.isBlocking()) {
             positionToBlockingElement.put(element.getPosition(), element);
         }
@@ -93,6 +101,7 @@ public class WorldMap implements IGameObserver {
     @Override
     public void handleTurnEnd() {
         moveProjectiles();
+        moveEnemyTanks();
         spawnObstacles();
         spawnEnemyTanks();
     }
@@ -105,6 +114,7 @@ public class WorldMap implements IGameObserver {
             } else {
                 game.incrementScore();
             }
+            enemyTanks.remove(tank);
         }
         if (element.isBlocking()) {
             positionToBlockingElement.remove(element.getPosition());
@@ -114,7 +124,8 @@ public class WorldMap implements IGameObserver {
 
     public void shoot(Vector2d playerPosition, Orientation bulletOrientation) {
         positionToProjectiles.putIfAbsent(playerPosition, new LinkedList<>());
-        positionToProjectiles.get(playerPosition).add(new Projectile(bulletOrientation, playerPosition, this, observers));
+        Projectile created = new Projectile(bulletOrientation, playerPosition, this, observers);
+        positionToProjectiles.get(playerPosition).add(created);
     }
 
     private void moveProjectiles() {
@@ -139,6 +150,9 @@ public class WorldMap implements IGameObserver {
     }
 
     private void spawnEnemyTanks() {
+        if (enemyTanks.size() > config.width()) {
+            return;
+        }
         List<Vector2d> randomPositions = new ArrayList<Vector2d>(freePositions);
         Collections.shuffle(randomPositions);
         for (int i = 0; i < 1; i++) {
@@ -149,7 +163,17 @@ public class WorldMap implements IGameObserver {
         }
     }
 
+    private void moveEnemyTanks() {
+        for (Tank enemy: enemyTanks) {
+            enemy.makeMove();
+        }
+    }
+
     public void setPlayerTank(Tank playerTank) {
         this.playerTank = playerTank;
+    }
+
+    public void shootAtPlayer(Tank shooting) {
+
     }
 }
