@@ -16,10 +16,6 @@ import utils.Vector2d;
 import visualization.controllers.field.FieldController;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 public class RootController implements IGameObserver {
     private static final String FIELD_FXML_PATH = "../../fxml/field/field.fxml";
@@ -28,9 +24,6 @@ public class RootController implements IGameObserver {
     private Config config;
     private Game game;
     private FieldController[][] fieldControllers;
-    private Map<Projectile, Vector2d> movedProjectilesCache = new HashMap<>();
-    private Set<Vector2d> clearedFieldsCache = new HashSet<>();
-    private Set<IMapElement> addedElementsCache = new HashSet<>();
     private int score = 0;
 
     public void initialize(Game game, Config config) throws IOException {
@@ -40,14 +33,14 @@ public class RootController implements IGameObserver {
     }
 
     private void initializeChildren() throws IOException {
-        fieldControllers = new FieldController[config.width()][config.height()];
-        for (int i = 0; i < config.width(); i++) {
-            for (int j = 0; j < config.height(); j++) {
+        fieldControllers = new FieldController[config.mapSize()][config.mapSize()];
+        for (int i = 0; i < config.mapSize(); i++) {
+            for (int j = 0; j < config.mapSize(); j++) {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource(FIELD_FXML_PATH));
                 StackPane fieldContainer = loader.load();
                 mapContainer.add(fieldContainer, i, j);
-                fieldControllers[i][config.height() - 1 - j] = loader.getController();
-                fieldControllers[i][config.height() - 1 - j].initialize(game, config);
+                fieldControllers[i][config.mapSize() - 1 - j] = loader.getController();
+                fieldControllers[i][config.mapSize() - 1 - j].initialize(game, config);
             }
         }
     }
@@ -59,31 +52,30 @@ public class RootController implements IGameObserver {
 
     @Override
     public void handleElementAdded(IMapElement element) {
-        addedElementsCache.add(element);
+        fieldControllers[element.getPosition().x][element.getPosition().y].addElement(element);
     }
 
     @Override
     public void handleTankMoved(Tank moved, Vector2d oldPosition) {
         fieldControllers[oldPosition.x][oldPosition.y].removeElement();
         fieldControllers[moved.getPosition().x][moved.getPosition().y].addElement(moved);
-        fieldControllers[moved.getPosition().x][moved.getPosition().y].removeProjectiles();
     }
 
     @Override
     public void handleProjectileMoved(Projectile moved, Vector2d oldPosition) {
-        movedProjectilesCache.put(moved, oldPosition);
+        fieldControllers[oldPosition.x][oldPosition.y].removeProjectile(moved);
+        fieldControllers[moved.getPosition().x][moved.getPosition().y].addProjectile(moved);
     }
 
     @Override
     public void handleTurnEnd() {
-        moveProjectiles();
-        clearFields();
-        addElements();
+
     }
 
     @Override
     public void handleElementDestroyed(IMapElement element) {
-        clearedFieldsCache.add(new Vector2d(element.getPosition().x, element.getPosition().y));
+        fieldControllers[element.getPosition().x][element.getPosition().y].removeElement();
+        fieldControllers[element.getPosition().x][element.getPosition().y].removeProjectiles();
         if (element instanceof Tank tank) {
             if (!tank.isPlayer()) {
                 handleScoreIncrement();
@@ -91,15 +83,6 @@ public class RootController implements IGameObserver {
         }
     }
 
-    private void moveProjectiles() {
-        for (Map.Entry<Projectile, Vector2d> entry: movedProjectilesCache.entrySet()) {
-            Projectile moved = entry.getKey();
-            Vector2d oldPosition = entry.getValue();
-            fieldControllers[oldPosition.x][oldPosition.y].removeProjectile(moved);
-            fieldControllers[moved.getPosition().x][moved.getPosition().y].addProjectile(moved);
-        }
-        movedProjectilesCache.clear();
-    }
 
     @Override
     public void handleGameEnd(int finalScore) {
@@ -107,20 +90,6 @@ public class RootController implements IGameObserver {
         mapContainer.add(new Text("You have lost"), 0, 0);
     }
 
-    private void clearFields() {
-        for (Vector2d position: clearedFieldsCache) {
-            fieldControllers[position.x][position.y].removeElement();
-            fieldControllers[position.x][position.y].removeProjectiles();
-        }
-        clearedFieldsCache.clear();
-    }
-
-    private void addElements() {
-        for (IMapElement element: addedElementsCache) {
-            fieldControllers[element.getPosition().x][element.getPosition().y].addElement(element);
-        }
-        addedElementsCache.clear();
-    }
 
     private void handleScoreIncrement() {
         score += 1;

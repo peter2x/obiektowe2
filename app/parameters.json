@@ -1,0 +1,5 @@
+{
+  "mapSize": 12,
+  "maxTankSpawnTimeGap": 5,
+  "maxObstacleSpawnTimeGap": 5
+}

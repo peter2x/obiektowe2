@@ -17,13 +17,16 @@ public class WorldMap implements IGameObserver {
     private final List<IGameObserver> observers;
     private final Game game;
     private Tank playerTank;
+    private IMapElement shotElement = null;
+    private int lastSpawnedTankTimeGap = 0;
+    private int lastSpawnedObstacleTimeGap = 0;
 
     public WorldMap(Game game, Config config, List<IGameObserver> observers) {
         this.config = config;
         this.observers = observers;
         this.game = game;
-        for (int i = 0; i < config.width(); i++) {
-            for (int j = 0; j < config.height(); j++) {
+        for (int i = 0; i < config.mapSize(); i++) {
+            for (int j = 0; j < config.mapSize(); j++) {
                 freePositions.add(new Vector2d(i, j));
             }
         }
@@ -39,7 +42,7 @@ public class WorldMap implements IGameObserver {
 
     public Vector2d fitToBorders(Vector2d position) {
         Vector2d lowerLeft = new Vector2d(0, 0);
-        Vector2d upperRight =  new Vector2d(config.width() - 1, config.height() - 1);
+        Vector2d upperRight =  new Vector2d(config.mapSize() - 1, config.mapSize() - 1);
         return position.fitToRectangle(lowerLeft, upperRight);
     }
 
@@ -60,7 +63,11 @@ public class WorldMap implements IGameObserver {
         if (positionToProjectiles.get(newPosition).removeIf(
                 p -> p.getOrientation().toUnitVector().opposite().equals(moved.getOrientation().toUnitVector())
         )) {
-            moved.getShoot();
+            shotElement = moved;
+        }
+        if (!moved.isPlayer() && !positionToProjectiles.get(moved.getPosition()).isEmpty()) {
+            positionToProjectiles.get(moved.getPosition()).clear();
+            shotElement = moved;
         }
     }
 
@@ -90,7 +97,7 @@ public class WorldMap implements IGameObserver {
         }
         Vector2d newPosition = moved.getPosition();
         if (blockingObjectAt(newPosition) != null) {
-            blockingObjectAt(newPosition).getShoot();
+            shotElement = blockingObjectAt(newPosition);
         } else {
             positionToProjectiles.putIfAbsent(moved.getPosition(), new LinkedList<>());
             positionToProjectiles.get(moved.getPosition()).add(moved);
@@ -100,6 +107,7 @@ public class WorldMap implements IGameObserver {
 
     @Override
     public void handleTurnEnd() {
+        checkShotElement();
         moveProjectiles();
         moveEnemyTanks();
         spawnObstacles();
@@ -135,41 +143,51 @@ public class WorldMap implements IGameObserver {
         }
         for (Projectile projectile: projectiles) {
             projectile.move();
+            checkShotElement();
         }
     }
 
     private void spawnObstacles() {
-        if (positionToBlockingElement.values().size() > config.width() * 1.6) {
+        Boolean shouldSpawnObstacle = (int)(Math.random() * config.maxObstacleSpawnTimeGap() / 3) == 0;
+        if (lastSpawnedObstacleTimeGap == config.maxObstacleSpawnTimeGap()) {
+            shouldSpawnObstacle = true;
+        }
+        if (!shouldSpawnObstacle) {
+            lastSpawnedObstacleTimeGap++;
             return;
         }
         List<Vector2d> randomPositions = new ArrayList<Vector2d>(freePositions);
         Collections.shuffle(randomPositions);
-        for (int i = 0; i < 1; i++) {
-            if (randomPositions.size() - 1 < i) {
-                return;
-            }
-            new Obstacle(randomPositions.get(i), this, observers);
+        if (randomPositions.size() == 0) {
+            return;
         }
+        new Obstacle(randomPositions.get(0), this, observers);
+        lastSpawnedObstacleTimeGap = 1;
     }
 
     private void spawnEnemyTanks() {
-        if (enemyTanks.size() > config.width()) {
+        Boolean shouldSpawnTank = (int)(Math.random() * config.maxTankSpawnTimeGap() / 3) == 0;
+        if (enemyTanks.size() == 0 || lastSpawnedTankTimeGap == config.maxTankSpawnTimeGap()) {
+            shouldSpawnTank = true;
+        }
+        if (!shouldSpawnTank) {
+            lastSpawnedTankTimeGap++;
             return;
         }
         List<Vector2d> randomPositions = new ArrayList<Vector2d>(freePositions);
         Collections.shuffle(randomPositions);
-        for (int i = 0; i < 1; i++) {
-            if (randomPositions.size() - 1 < i) {
-                return;
-            }
-            new Tank(randomPositions.get(i), this, observers, false);
+        if (randomPositions.size() == 0) {
+            return;
         }
+        new Tank(randomPositions.get(0), this, observers, false);
+        lastSpawnedTankTimeGap = 1;
     }
 
     private void moveEnemyTanks() {
         List<Tank> tanksToMove = new LinkedList<>(enemyTanks);
         for (Tank enemy: tanksToMove) {
             enemy.makeMove();
+            checkShotElement();
         }
     }
 
@@ -185,5 +203,12 @@ public class WorldMap implements IGameObserver {
         positionToProjectiles.putIfAbsent(shooting.getPosition(), new LinkedList<>());
         Projectile created = new Projectile(shooting.getOrientation(), shooting.getPosition(), this, observers);
         positionToProjectiles.get(shooting.getPosition()).add(created);
+    }
+
+    private void checkShotElement() {
+        if (shotElement != null) {
+            shotElement.getShoot();
+            shotElement = null;
+        }
     }
 }

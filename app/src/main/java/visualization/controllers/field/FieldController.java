@@ -19,7 +19,7 @@ public class FieldController {
     private static final String TANK_BLUE_TEXTURE_PATH = "tank_blue.png";
     private static final String TANK_RED_TEXTURE_PATH = "tank_red.png";
     private static final String PROJECTILE_TEXTURE_PATH = "projectile-removebg-preview.png";
-    private static final String OBSTACLE_TEXTURE_PATH = "obstacle.jpg";
+    private static final String OBSTACLE_TEXTURE_PATH = "obstacle-removebg.png";
 
     @FXML private ImageView field;
     @FXML private ImageView element;
@@ -30,8 +30,8 @@ public class FieldController {
 
     public void initialize(Game game, Config config) {
         field.setImage(ImagesManager.getImage(FIELD_TEXTURE_PATH));
-        field.setFitHeight((double)(900 / config.width()));
-        field.setFitWidth((double)(900 / config.height()));
+        field.setFitHeight((double)(900 / config.mapSize()));
+        field.setFitWidth((double)(900 / config.mapSize()));
         this.config = config;
     }
 
@@ -43,13 +43,13 @@ public class FieldController {
         if (added instanceof Tank tank) {
             element.setImage(ImagesManager.getImage(tank.isPlayer() ? TANK_BLUE_TEXTURE_PATH : TANK_RED_TEXTURE_PATH));
             element.rotateProperty().setValue(45 * tank.getOrientation().getValue());
-            element.setFitWidth((double)52);
-            element.setFitHeight((double)41);
+            element.setFitWidth((double)780 / (double)config.mapSize());
+            element.setFitHeight((double)615 / (double)config.mapSize());
         } else {
             element.setImage(ImagesManager.getImage(OBSTACLE_TEXTURE_PATH));
             element.rotateProperty().setValue(0);
-            element.setFitHeight((double)(900 / config.width()));
-            element.setFitWidth((double)(900 / config.height()));
+            element.setFitHeight((double)(900 / config.mapSize()));
+            element.setFitWidth((double)(900 / config.mapSize()));
         }
     }
 
